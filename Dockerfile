@@ -15,7 +15,7 @@ RUN cp -R main/vendor/codeigniter4/framework/writable main/.
 
 RUN cp main/vendor/codeigniter4/framework/env main/sub/.env
 RUN cp main/vendor/codeigniter4/framework/spark main/sub/.
-RUN cp main/vendor/codeigniter4/framework/phpunit.xml.dist main/.
+# RUN cp main/vendor/codeigniter4/framework/phpunit.xml.dist main/.
 
 RUN sed -i "s/\/..\/..\/system/\/..\/..\/..\/vendor\/codeigniter4\/framework\/system/g" main/sub/app/Config/Paths.php
 RUN sed -i "s/\/..\/..\/writable/\/..\/..\/..\/writable/g" main/sub/app/Config/Paths.php
