@@ -4,6 +4,8 @@ RUN apk add --no-cache apache2 php-apache2 php-pdo php-intl php-dom php-xml php-
 RUN rm -rf /var/cache/apk/*
 
 RUN sed -i "s/htdocs/main\/sub\/public/g" /etc/apache2/httpd.conf
+RUN sed -i "s/#LoadModule rewrite_module/LoadModule rewrite_module/g" /etc/apache2/httpd.conf
+RUN sed -i "s/AllowOverride None/AllowOverride All/g" /etc/apache2/httpd.conf
 
 WORKDIR /var/www/localhost
 RUN mkdir -p main/sub
