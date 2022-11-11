@@ -39,6 +39,9 @@ RUN php ci4/sub/spark db:create sub --ext db
 RUN composer require codeigniter4/shield:dev-develop --working-dir=ci4
 RUN yes | php ci4/sub/spark shield:setup
 
+RUN sed -i "s/\/\/ 'invalidchars',/\/\/ 'invalidchars',\n\t\t\t'session' => \['except' => \['login*', 'register', 'auth\/a\/*'\]\],/g" ci4/sub
+/app/Config/Filters.php
+
 RUN chown -R apache:apache *
 RUN chmod -R 0777 *
 
