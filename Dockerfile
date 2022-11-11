@@ -25,6 +25,7 @@ RUN sed -i "s/\/..\/..\/tests/\/..\/..\/..\/tests/g" ci4/sub/app/Config/Paths.ph
 
 RUN sed -i "s/vendor\/autoload.php/..\/vendor\/autoload.php/g" ci4/sub/app/Config/Constants.php
 
+RUN sed -i "s/'index.php'/''/g" ci4/sub/app/Config/App.php
 RUN sed -i "s/America\/Chicago/America\/New_York/g" ci4/sub/app/Config/App.php
 
 RUN sed -i "s/# CI_ENVIRONMENT = production/CI_ENVIRONMENT = development/g" ci4/sub/.env
