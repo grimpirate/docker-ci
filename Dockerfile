@@ -2,7 +2,7 @@
 FROM alpine
 
 # Install requirements for Codeigniter and SQLite
-RUN apk add --no-cache apache2 php-apache2 php-pdo php-intl php-dom php-xml php-xmlwriter php-tokenizer php-ctype php-sqlite3 php-session composer
+RUN apk add --no-cache apache2 php-apache2 php-pdo php-intl php-dom php-xml php-xmlwriter php-tokenizer php-ctype php-sqlite3 php-session composer sqlite nano
 RUN rm -rf /var/cache/apk/*
 
 # Change web folder from /var/www/localhost/htdocs to /var/www/localhost/ci4/sub/public
