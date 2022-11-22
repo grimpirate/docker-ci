@@ -5,7 +5,7 @@ FROM alpine
 RUN apk add --no-cache apache2 php-apache2 php-pdo php-intl php-dom php-xml php-xmlwriter php-tokenizer php-ctype php-sqlite3 php-session composer sqlite nano tzdata
 RUN rm -rf /var/cache/apk/*
 
-# Setup timezone
+# Setup timezone (appropriate timezone necessary for Google 2FA)
 RUN cp /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN echo "America/New_York" >  /etc/timezone
 RUN sed -i "s/;date.timezone =/date.timezone = \"America\/New_York\"/" /etc/php*/php.ini
@@ -66,9 +66,6 @@ RUN php ci4/sub/spark db:create sub --ext db
 
 # Composer install shield into ci4 directory (for user logins)
 RUN composer require codeigniter4/shield:dev-develop --working-dir=ci4
-# Composer install Google Two Factor Authentication & QRCode Generator
-RUN composer require pragmarx/google2fa --working-dir=ci4
-RUN composer require bacon/bacon-qr-code --working-dir=ci4
 
 # Modify database migration to create an extra secret column in auth_identities table
 RUN sed -i "s/^[[:space:]]\+'secret2'.\+/'secret2'   => ['type' => 'varchar', 'constraint' => 255, 'null' => true],\n'google2fa' => ['type' => 'varchar', 'constraint' => 255, 'null' => true],/" ci4/vendor/codeigniter4/shield/src/Database/Migrations/*.php
@@ -78,12 +75,20 @@ RUN yes | php ci4/sub/spark shield:setup
 # Enable authorization on all routes except login, register, and auth
 RUN sed -i "s/\/\/ 'invalidchars',/\/\/ 'invalidchars',\n\t\t\t'session' => \['except' => \['login*', 'register', 'auth\/a\/*'\]\],/" ci4/sub/app/Config/Filters.php
 
+# Composer install Google Two Factor Authentication & QRCode Generator
+RUN composer require pragmarx/google2fa --working-dir=ci4
+RUN composer require bacon/bacon-qr-code --working-dir=ci4
+
 # Modify Shield to use EmailActivator after registration
 RUN sed -i "s/'register'[[:space:]]\+=>[[:space:]]\+null/'register' => 'CodeIgniter\\\\Shield\\\\Authentication\\\\Actions\\\\EmailActivator'/" ci4/sub/app/Config/Auth.php
 # Modify Shield's Session Authenticator to use Google 2FA for verification
 RUN sed -i "s/empty(\$token.\+/empty(\$token) || !(new \\\\PragmaRX\\\\Google2FA\\\\Google2FA())->verifyKey(\$identity->secret, \$token, 0)) {/" ci4/vendor/codeigniter4/shield/src/Authentication/Authenticators/Session.php
 # Modify Shield's Email Activation View
 RUN sed -i "s/<\/p>/<\/p><?php helper('qrcode'); ?><p><?= qrcode('CodeIgniter', \$user->username, \$secret) ?><\/p>/" ci4/vendor/codeigniter4/shield/src/Views/email_activate_show.php
+# Modify Shield's Email Activation View language
+RUN sed -i "s/^[[:space:]]\+'needVerification'.\+/'needVerification' => 'Scan QR code to complete account activation.',/g" ci4/vendor/codeigniter4/shield/src/Language/en/Auth.php
+RUN sed -i "s/^[[:space:]]\+'emailActivateTitle'.\+/'emailActivateTitle' => 'Two-Factor Authentication',/g" ci4/vendor/codeigniter4/shield/src/Language/en/Auth.php
+RUN sed -i "s/^[[:space:]]\+'emailActivateBody'.\+/'emailActivateBody' => 'Scan this QR code with a Two-Factor Authentication app (<a href=\"https:\/\/play.google.com\/store\/apps\/details?id=com.google.android.apps.authenticator2\" target=\"_blank\">Android<\/a>\/<a href=\"https:\/\/apps.apple.com\/us\/app\/google-authenticator\/id388497605\" target=\"_blank\">iOS<\/a>) and enter a One-Time Password to activate your account.',/g" ci4/vendor/codeigniter4/shield/src/Language/en/Auth.php
 # Copy qrcode_helper.php
 ADD qrcode_helper.php ci4/sub/app/Helpers/
 # Overwrite EmailActivator.php
