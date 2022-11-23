@@ -15,7 +15,7 @@
 
             <p><?= lang('QRAuth.qrcodeActivateBody') ?></p>
 
-            <?php helper('qrcode'); ?><p><?= qrcode('CodeIgniter', $user->username, $secret) ?></p>
+            <p><?= $qrcode ?></p>
 
             <form action="<?= site_url('auth/a/verify') ?>" method="post">
                 <?= csrf_field() ?>
