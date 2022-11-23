@@ -22,6 +22,7 @@ use PragmaRX\Google2FA\Google2FA;
 class QRCodeActivator implements ActionInterface
 {
     private string $type = 'qrcode_activate';
+    private string $issuer = 'CodeIgniter';
 
     /**
      * Shows the initial screen to the user with a QR code for activation
@@ -36,10 +37,11 @@ class QRCodeActivator implements ActionInterface
             throw new RuntimeException('Cannot get the pending login User.');
         }
 
-        $code = $this->createIdentity($user);
+        helper('qrcode');
+        $qrcode = qrcode($this->issuer, $user->username, $this->createIdentity($user));
 
         // Display the info page
-        return view(setting('Auth.views')['action_qrcode_activate_show'], ['user' => $user, 'secret' => $code]);
+        return view(setting('Auth.views')['action_qrcode_activate_show'], ['user' => $user, 'qrcode' => $qrcode]);
     }
 
     /**
@@ -78,7 +80,10 @@ class QRCodeActivator implements ActionInterface
         if (! $authenticator->checkAction($identity, $postedToken)) {
             session()->setFlashdata('error', lang('Auth.invalidActivateToken'));
 
-            return view(setting('Auth.views')['action_qrcode_activate_show'], ['user' => $user, 'secret' => $secret]);
+            helper('qrcode');
+            $qrcode = qrcode($this->issuer, $user->username, $secret);
+
+            return view(setting('Auth.views')['action_qrcode_activate_show'], ['user' => $user, 'qrcode' => $qrcode]);
         }
 
         $user = $authenticator->getUser();
@@ -135,20 +140,6 @@ class QRCodeActivator implements ActionInterface
             $identityModel->deleteIdentitiesByType($user, $data['type']);
 
         return $identityModel->createCodeIdentity($user, $data, $generator);
-    }
-
-    /**
-     * Creates an identity for the action of the user.
-     *
-     */
-    public function updateEmailIdentity(User $user, string $extra): void
-    {
-        /** @var UserIdentityModel $identityModel */
-        $identityModel = model(UserIdentityModel::class);
-
-        $emailIdentity = $user->getEmailIdentity();
-        $emailIdentity->extra = $extra;
-        $identityModel->touchIdentity($emailIdentity);
     }
 
     /**

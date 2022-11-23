@@ -91,34 +91,26 @@ class QRCode2FA implements ActionInterface
      */
     public function createIdentity(User $user): string
     {
-        $secret = $this->getGoogle2FA($user);
-        return $this->generateIdentity(
+        /** @var UserIdentityModel $identityModel */
+        $identityModel = model(UserIdentityModel::class);
+
+        $secret = $identityModel->getIdentityByType(
+            $user,
+            'google_2fa'
+        )->secret;
+
+        // Delete any previous identities for action
+        $identityModel->deleteIdentitiesByType($user, $this->type);
+
+        return $identityModel->createCodeIdentity(
             $user,
             [
                 'type'  => $this->type,
                 'name'  => 'login',
                 'extra' => lang('Auth.need2FA'),
             ],
-            static fn (): string => $secret,
-            true
+            static fn (): string => $secret
         );
-    }
-
-    /**
-     * Creates an identity for the action of the user.
-     *
-     * @return string secret
-     */
-    private function generateIdentity(User $user, array $data, callable $generator, bool $deletePriors): string
-    {
-        /** @var UserIdentityModel $identityModel */
-        $identityModel = model(UserIdentityModel::class);
-
-        // Delete any previous identities for action
-        if($deletePriors)
-            $identityModel->deleteIdentitiesByType($user, $data['type']);
-
-        return $identityModel->createCodeIdentity($user, $data, $generator);
     }
 
     /**
@@ -133,20 +125,6 @@ class QRCode2FA implements ActionInterface
             $user,
             $this->type
         );
-    }
-
-    /**
-     * Returns the 2FA of a registered user.
-     */
-    private function getGoogle2FA(User $user): string
-    {
-        /** @var UserIdentityModel $identityModel */
-        $identityModel = model(UserIdentityModel::class);
-
-        return $identityModel->getIdentityByType(
-            $user,
-            'google_2fa'
-        )->secret;
     }
 
     /**
