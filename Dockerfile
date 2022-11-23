@@ -64,18 +64,8 @@ RUN sed -i "s/<\/ul>/\t<li class=\"menu-item hidden\"><?= anchor\('\/logout', 'L
 # Create SQLite database for use (gets created in writable directory)
 RUN php ci4/sub/spark db:create sub --ext db
 
-# Composer install Google Two Factor Authentication & QRCode Generator
-RUN composer require pragmarx/google2fa --working-dir=ci4
-RUN composer require bacon/bacon-qr-code --working-dir=ci4
-
 # Composer install shield into ci4 directory (for user logins)
 RUN composer require codeigniter4/shield:dev-develop --working-dir=ci4
-
-# Copy Halberd module
-RUN mkdir -p ci4/sub/app/Modules
-ADD Modules ci4/sub/app/Modules
-# Create Halberd namespace on autoload
-RUN sed -i "s/'Config',/'Config',\n\t\t'Halberd'     => APPPATH . 'Modules\/halberd\/',/" ci4/sub/app/Config/Autoload.php
 
 # Setup shield using spark and answer yes to migration question
 RUN yes | php ci4/sub/spark shield:setup
@@ -83,9 +73,19 @@ RUN yes | php ci4/sub/spark shield:setup
 # Enable authorization on all routes except login, register, and auth
 RUN sed -i "s/\/\/ 'invalidchars',/\/\/ 'invalidchars',\n\t\t\t'session' => \['except' => \['login*', 'register', 'auth\/a\/*'\]\],/" ci4/sub/app/Config/Filters.php
 
-# Modify Shield to use Halberd's EmailActivator after registration
+# Composer install Google Two Factor Authentication & QRCode Generator
+RUN composer require pragmarx/google2fa --working-dir=ci4
+RUN composer require bacon/bacon-qr-code --working-dir=ci4
+
+# Configure Halberd module
+RUN mkdir -p ci4/sub/app/Modules
 RUN sed -i "s/'register'[[:space:]]\+=>[[:space:]]\+null/'register' => 'Halberd\\\\Authentication\\\\Actions\\\\QRCodeActivator'/" ci4/sub/app/Config/Auth.php
-RUN sed -i "s/views.\+/views = [\n'action_qrcode_activate_show'  => '\\\\Halberd\\\\Views\\\\qrcode_activate_show',/" ci4/sub/app/Config/Auth.php
+RUN sed -i "s/'login'[[:space:]]\+=>[[:space:]]\+null/'login' => 'Halberd\\\\Authentication\\\\Actions\\\\QRCode2FA'/" ci4/sub/app/Config/Auth.php
+RUN sed -i "s/views.\+/views = [\n'action_qrcode_activate_show'  => '\\\\Halberd\\\\Views\\\\qrcode_activate_show',\n'action_qrcode_2fa_verify'  => '\\\\Halberd\\\\Views\\\\qrcode_2fa_verify',/" ci4/sub/app/Config/Auth.php
+RUN sed -i "s/'Config',/'Config',\n\t\t'Halberd'     => APPPATH . 'Modules\/halberd\/',/" ci4/sub/app/Config/Autoload.php
+
+# Copy Halberd module
+ADD Modules ci4/sub/app/Modules
 
 # Modify all directories and files to ensure no permission problems occur during development
 RUN chown -R apache:apache *
