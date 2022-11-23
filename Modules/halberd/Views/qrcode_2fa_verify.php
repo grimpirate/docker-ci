@@ -9,21 +9,19 @@
         <div class="card-body">
             <h5 class="card-title mb-5"><?= lang('QRAuth.qrcode2FATitle') ?></h5>
 
-            <?php if (session('error')) : ?>
-                <div class="alert alert-danger"><?= session('error') ?></div>
+            <p><?= lang('QRAuth.qrcodeConfirmCode') ?></p>
+
+            <?php if (session('error') !== null) : ?>
+            <div class="alert alert-danger"><?= session('error') ?></div>
             <?php endif ?>
 
-            <p><?= lang('QRAuth.qrcodeActivateBody') ?></p>
-
-            <?php helper('qrcode'); ?><p><?= qrcode('CodeIgniter', $user->username, $secret) ?></p>
-
-            <form action="<?= site_url('auth/a/verify') ?>" method="post">
+            <form action="<?= url_to('auth-action-verify') ?>" method="post">
                 <?= csrf_field() ?>
 
                 <!-- Code -->
                 <div class="mb-2">
-                    <input type="text" class="form-control" name="token" placeholder="000000" inputmode="numeric"
-                        pattern="[0-9]*" autocomplete="one-time-code" value="<?= old('token') ?>" required />
+                    <input type="number" class="form-control" name="token" placeholder="000000"
+                        inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" required />
                 </div>
 
                 <div class="d-grid col-8 mx-auto m-3">

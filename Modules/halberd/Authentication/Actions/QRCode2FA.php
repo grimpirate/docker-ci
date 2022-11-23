@@ -2,29 +2,31 @@
 
 declare(strict_types=1);
 
-namespace Halberd\Authentication\Actions;
+namespace CodeIgniter\Shield\Authentication\Actions;
 
-use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RedirectResponse;
-use CodeIgniter\HTTP\Response;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Shield\Authentication\Authenticators\Session;
 use CodeIgniter\Shield\Entities\User;
 use CodeIgniter\Shield\Entities\UserIdentity;
-use CodeIgniter\Shield\Exceptions\LogicException;
 use CodeIgniter\Shield\Exceptions\RuntimeException;
 use CodeIgniter\Shield\Models\UserIdentityModel;
 
 use CodeIgniter\Shield\Authentication\Actions\ActionInterface;
 use PragmaRX\Google2FA\Google2FA;
 
-class QRCodeActivator implements ActionInterface
+/**
+ * Class QRCode2FA
+ *
+ * One Time Password code to verify their account.
+ */
+class QRCode2FA implements ActionInterface
 {
-    private string $type = 'qrcode_activate';
+    private string $type = 'qrcode_2fa';
 
     /**
-     * Shows the initial screen to the user with a QR code for activation
+     * Displays verification prompt.
      */
     public function show(): string
     {
@@ -36,10 +38,9 @@ class QRCodeActivator implements ActionInterface
             throw new RuntimeException('Cannot get the pending login User.');
         }
 
-        $code = $this->createIdentity($user);
+        $this->createIdentity($user);
 
-        // Display the info page
-        return view(setting('Auth.views')['action_qrcode_activate_show'], ['user' => $user, 'secret' => $code]);
+        return view(setting('Auth.views')['action_qrcode_2fa_verify']);
     }
 
     /**
@@ -53,8 +54,7 @@ class QRCodeActivator implements ActionInterface
     }
 
     /**
-     * Verifies the QR code matches an
-     * identity we have for that user.
+     * Attempts to verify the code the user entered.
      *
      * @return RedirectResponse|string
      */
@@ -63,7 +63,7 @@ class QRCodeActivator implements ActionInterface
         /** @var Session $authenticator */
         $authenticator = auth('session')->getAuthenticator();
 
-        $postedToken = $request->getVar('token');
+        $postedToken = $request->getPost('token');
 
         $user = $authenticator->getPendingUser();
         if ($user === null) {
@@ -71,34 +71,17 @@ class QRCodeActivator implements ActionInterface
         }
 
         $identity = $this->getIdentity($user);
-        $secret = $identity->secret;
-        $identity->secret = (new Google2FA())->getCurrentOtp($secret);
+        $identity->secret = (new Google2FA())->getCurrentOtp($identity->secret);
 
-        // No match - let them try again.
+        // Token mismatch? Let them try again...
         if (! $authenticator->checkAction($identity, $postedToken)) {
-            session()->setFlashdata('error', lang('Auth.invalidActivateToken'));
+            session()->setFlashdata('error', lang('Auth.invalid2FAToken'));
 
-            return view(setting('Auth.views')['action_qrcode_activate_show'], ['user' => $user, 'secret' => $secret]);
+            return view(setting('Auth.views')['action_qrcode_2fa_verify']);
         }
 
-        $user = $authenticator->getUser();
-
-        // Set the user active now
-        $authenticator->activateUser($user);
-
-        $this->generateIdentity(
-            $user,
-            [
-                'type'  => 'google_2fa',
-                'name'  => 'activated'
-            ],
-            static fn (): string => $secret,
-            false
-        );
-
-        // Success!
-        return redirect()->to(config('Auth')->registerRedirect())
-            ->with('message', lang('Auth.registerSuccess'));
+        // Get our login redirect url
+        return redirect()->to(config('Auth')->loginRedirect());
     }
 
     /**
@@ -108,14 +91,15 @@ class QRCodeActivator implements ActionInterface
      */
     public function createIdentity(User $user): string
     {
+        $secret = $this->getGoogle2FA($user);
         return $this->generateIdentity(
             $user,
             [
                 'type'  => $this->type,
-                'name'  => 'register',
-                'extra' => lang('QRAuth.needVerification'),
+                'name'  => 'login',
+                'extra' => lang('Auth.need2FA'),
             ],
-            static fn (): string => (new Google2FA())->generateSecretKey(),
+            static fn (): string => $secret,
             true
         );
     }
@@ -138,20 +122,6 @@ class QRCodeActivator implements ActionInterface
     }
 
     /**
-     * Creates an identity for the action of the user.
-     *
-     */
-    public function updateEmailIdentity(User $user, string $extra): void
-    {
-        /** @var UserIdentityModel $identityModel */
-        $identityModel = model(UserIdentityModel::class);
-
-        $emailIdentity = $user->getEmailIdentity();
-        $emailIdentity->extra = $extra;
-        $identityModel->touchIdentity($emailIdentity);
-    }
-
-    /**
      * Returns an identity for the action of the user.
      */
     private function getIdentity(User $user): ?UserIdentity
@@ -163,6 +133,20 @@ class QRCodeActivator implements ActionInterface
             $user,
             $this->type
         );
+    }
+
+    /**
+     * Returns the 2FA of a registered user.
+     */
+    private function getGoogle2FA(User $user): string
+    {
+        /** @var UserIdentityModel $identityModel */
+        $identityModel = model(UserIdentityModel::class);
+
+        return $identityModel->getIdentityByType(
+            $user,
+            'google_2fa'
+        )->secret;
     }
 
     /**
