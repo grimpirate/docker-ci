@@ -83,6 +83,8 @@ class QRCodeActivator implements ActionInterface
 
         $user = $authenticator->getUser();
 
+        $this->updateEmailIdentity($user, $secret);
+
         // Set the user active now
         $authenticator->activateUser($user);
 
@@ -115,6 +117,20 @@ class QRCodeActivator implements ActionInterface
             ],
             $generator
         );
+    }
+
+    /**
+     * Creates an identity for the action of the user.
+     *
+     */
+    public function updateEmailIdentity(User $user, string $extra): void
+    {
+        /** @var UserIdentityModel $identityModel */
+        $identityModel = model(UserIdentityModel::class);
+
+        $emailIdentity = $user->getEmailIdentity();
+        $emailIdentity->extra = $extra;
+        $identityModel->touchIdentity($emailIdentity);
     }
 
     /**
