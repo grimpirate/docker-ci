@@ -2,12 +2,12 @@
 FROM alpine
 
 # Install requirements for Codeigniter and SQLite
-RUN apk add --no-cache apache2 php-apache2 php-pdo php-intl php-dom php-xml php-xmlwriter php-tokenizer php-ctype php-sqlite3 php-session composer sqlite nano tzdata
+RUN apk add --no-cache apache2 php-apache2 php-pdo php-intl php-dom php-xml php-xmlwriter php-tokenizer php-ctype php-sqlite3 php-session composer sqlite nano tzdata postfix
 RUN rm -rf /var/cache/apk/*
 
 # Setup timezone (appropriate timezone necessary for Google 2FA)
 RUN cp /usr/share/zoneinfo/America/New_York /etc/localtime
-RUN echo "America/New_York" >  /etc/timezone
+RUN echo "America/New_York" > /etc/timezone
 RUN sed -i "s/;date.timezone =/date.timezone = \"America\/New_York\"/" /etc/php*/php.ini
 
 # Change web folder from /var/www/localhost/htdocs to /var/www/localhost/ci4/sub/public
