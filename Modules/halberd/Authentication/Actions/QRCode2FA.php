@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CodeIgniter\Shield\Authentication\Actions;
+namespace Halberd\Authentication\Actions;
 
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RedirectResponse;
