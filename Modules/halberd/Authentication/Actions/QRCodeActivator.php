@@ -89,7 +89,7 @@ class QRCodeActivator implements ActionInterface
         $user = $authenticator->getUser();
 
         // Set the user active now
-        $authenticator->activateUser($user);
+        $user->activate();
 
         $this->generateIdentity(
             $user,
