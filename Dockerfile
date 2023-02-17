@@ -81,7 +81,7 @@ RUN composer require bacon/bacon-qr-code --working-dir=ci4
 RUN mkdir -p ci4/sub/app/Modules
 RUN sed -i "s/'register'[[:space:]]\+=>[[:space:]]\+null/'register' => 'Halberd\\\\Authentication\\\\Actions\\\\QRCodeActivator'/" ci4/sub/app/Config/Auth.php
 RUN sed -i "s/'login'[[:space:]]\+=>[[:space:]]\+null/'login' => 'Halberd\\\\Authentication\\\\Actions\\\\QRCode2FA'/" ci4/sub/app/Config/Auth.php
-RUN sed -i "s/views.\+/views = [\n'action_qrcode_activate_show'  => '\\\\Halberd\\\\Views\\\\qrcode_activate_show',\n'action_qrcode_2fa_verify'  => '\\\\Halberd\\\\Views\\\\qrcode_2fa_verify',/" ci4/sub/app/Config/Auth.php
+RUN sed -i "s/views.\+/views = [\n'action_qrcode_activate_show'  => '\\\\Halberd\\\\Views\\\\qrcode_activate_show',\n'action_qrcode_2fa_verify'  => '\\\\Halberd\\\\Views\\\\qrcode_2fa_verify',\n'qrcode_layout'  => '\\\\Halberd\\\\Views\\\\qrcode_layout',/" ci4/sub/app/Config/Auth.php
 RUN sed -i "s/'Config',/'Config',\n\t\t'Halberd'     => APPPATH . 'Modules\/halberd\/',/" ci4/sub/app/Config/Autoload.php
 
 # Copy Halberd module
