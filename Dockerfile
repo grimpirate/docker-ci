@@ -77,13 +77,10 @@ RUN sed -i "s/\/\/ 'invalidchars',/\/\/ 'invalidchars',\n\t\t\t'session' => \['e
 RUN composer require pragmarx/google2fa --working-dir=ci4
 RUN composer require bacon/bacon-qr-code --working-dir=ci4
 
-# Configure Halberd module
+# Copy Halberd module
 RUN mkdir -p ci4/sub/app/Modules
-RUN sed -i "s/'register'[[:space:]]\+=>[[:space:]]\+null/'register' => 'Halberd\\\\Authentication\\\\Actions\\\\QRCodeActivator'/" ci4/sub/app/Config/Auth.php
-RUN sed -i "s/'login'[[:space:]]\+=>[[:space:]]\+null/'login' => 'Halberd\\\\Authentication\\\\Actions\\\\QRCode2FA'/" ci4/sub/app/Config/Auth.php
-RUN sed -i "s/views.\+/views = [\n'action_qrcode_activate_show'  => '\\\\Halberd\\\\Views\\\\qrcode_activate_show',\n'action_qrcode_2fa_verify'  => '\\\\Halberd\\\\Views\\\\qrcode_2fa_verify',\n'qrcode_layout'  => '\\\\Halberd\\\\Views\\\\qrcode_layout',/" ci4/sub/app/Config/Auth.php
+# Halberd module namespace autoload configuration
 RUN sed -i "s/'Config',/'Config',\n\t\t'Halberd'     => APPPATH . 'Modules\/halberd\/',/" ci4/sub/app/Config/Autoload.php
-
 # Copy Halberd module
 ADD Modules ci4/sub/app/Modules
 
