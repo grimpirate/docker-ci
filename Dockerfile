@@ -74,7 +74,7 @@ RUN yes | php ci4/sub/spark shield:setup
 RUN composer require pragmarx/google2fa --working-dir=ci4
 RUN composer require bacon/bacon-qr-code --working-dir=ci4
 
-# Copy Halberd module
+# Create directory for Modules
 RUN mkdir -p ci4/sub/app/Modules
 # Halberd module namespace autoload configuration
 RUN sed -i "s/'Config',/'Config',\n\t\t'Halberd'     => APPPATH . 'Modules\/halberd\/',/" ci4/sub/app/Config/Autoload.php
