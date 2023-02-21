@@ -70,9 +70,6 @@ RUN composer require codeigniter4/shield:dev-develop --working-dir=ci4
 # Setup shield using spark and answer yes to migration question
 RUN yes | php ci4/sub/spark shield:setup
 
-# Enable authorization on all routes except login, register, and auth
-RUN sed -i "s/\/\/ 'invalidchars',/\/\/ 'invalidchars',\n\t\t\t'session' => \['except' => \['login*', 'register', 'auth\/a\/*'\]\],/" ci4/sub/app/Config/Filters.php
-
 # Composer install Google Two Factor Authentication & QRCode Generator
 RUN composer require pragmarx/google2fa --working-dir=ci4
 RUN composer require bacon/bacon-qr-code --working-dir=ci4
