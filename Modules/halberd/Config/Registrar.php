@@ -4,6 +4,7 @@ namespace Halberd\Config;
 
 class Registrar
 {
+    // Classes for Halberd module
     public static function Auth(): array
     {
         return [
@@ -17,5 +18,11 @@ class Registrar
                 'login' => 'Halberd\Authentication\Actions\QRCode2FA',
             ],
         ];
+    }
+
+    // Enable authorization on all routes except login, register, and auth
+    public static function Filters(): array
+    {
+        return ['globals' => ['before' => ['session' => ['except' => ['login*', 'register', 'auth/a/*']]]]];
     }
 }
