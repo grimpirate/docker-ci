@@ -70,19 +70,8 @@ RUN composer require codeigniter4/shield:dev-develop --working-dir=ci4
 # Setup shield using spark and answer yes to migration question
 RUN yes | php ci4/sub/spark shield:setup
 
-# Composer install Google Two Factor Authentication & QRCode Generator
-RUN composer require pragmarx/google2fa --working-dir=ci4
-RUN composer require bacon/bacon-qr-code --working-dir=ci4
-
-# Get Halberd module
-RUN wget https://github.com/grimpirate/halberd/archive/main.tar.gz
-RUN tar -xzf main.tar.gz
-RUN mkdir -p ci4/sub/app/Modules
-RUN mv halberd-main ci4/sub/app/Modules/halberd
-RUN rm main.tar.gz ci4/sub/app/Modules/halberd/LICENSE ci4/sub/app/Modules/halberd/README.md
-
-# Configure Halberd module
-RUN sed -i "s/public \$psr4 = \[/public \$psr4 = [\n\t'Halberd'     => APPPATH . 'Modules\/halberd\/',/" ci4/sub/app/Config/Autoload.php
+# Composer install Halberd (Google 2FA)
+RUN composer require grimpirate/halberd:dev-main --working-dir=ci4
 
 # Modify all directories and files to ensure no permission problems occur during development
 RUN chown -R apache:apache *
