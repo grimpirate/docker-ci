@@ -70,8 +70,11 @@ RUN composer require codeigniter4/shield:dev-develop --working-dir=ci4
 # Setup shield using spark and answer yes to migration question
 RUN yes | php ci4/sub/spark shield:setup
 
+# Enable authorization on all routes except login, register, and auth
+RUN sed -i "s/\/\/ 'invalidchars',/\/\/ 'invalidchars',\n\t\t\t'session' => \['except' => \['login*', 'register', 'auth\/a\/*'\]\],/" ci4/sub/app/Config/Filters.php
+
 # Composer install Halberd (Google 2FA)
-RUN composer require grimpirate/halberd:dev-main --working-dir=ci4
+RUN composer require grimpirate/halberd:dev-develop --working-dir=ci4
 
 # Modify all directories and files to ensure no permission problems occur during development
 RUN chown -R apache:apache *
