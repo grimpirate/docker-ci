@@ -73,6 +73,9 @@ RUN yes | php ci4/sub/spark shield:setup
 # Enable authorization on all routes except login, register, and auth
 RUN sed -i "s/\/\/ 'invalidchars',/\/\/ 'invalidchars',\n\t\t\t'session' => \['except' => \['login*', 'register', 'auth\/a\/*'\]\],/" ci4/sub/app/Config/Filters.php
 
+# Set project minimum-stability to dev
+RUN composer config minimum-stability dev --working-dir=ci4
+
 # Composer install Halberd (Google 2FA)
 RUN composer require grimpirate/halberd:dev-develop --working-dir=ci4
 
