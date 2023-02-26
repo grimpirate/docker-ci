@@ -40,19 +40,11 @@ RUN sed -i "s/\/..\/..\/tests/\/..\/..\/..\/tests/" ci4/sub/app/Config/Paths.php
 # Modify composer path to be one level higher
 RUN sed -i "s/vendor\/autoload.php/..\/vendor\/autoload.php/" ci4/sub/app/Config/Constants.php
 
-# Modify URLs to not include index.php
-RUN sed -i "s/'index.php'/''/" ci4/sub/app/Config/App.php
-# Modify timezone
-RUN sed -i "s/America\/Chicago/America\/New_York/" ci4/sub/app/Config/App.php
-
 # Change environment to development
 RUN sed -i "s/# CI_ENVIRONMENT = production/CI_ENVIRONMENT = development/" ci4/sub/.env
-# Change baseURL to localhost
-RUN sed -i "s/# app.baseURL = ''/app.baseURL = 'http:\/\/localhost'/" ci4/sub/.env
-# Specify SQLite database and driver
-Run sed -i "s/# database.default.hostname = localhost/database.default.database = sub.db\ndatabase.default.DBDriver = SQLite3\n\n# database.default.hostname = localhost/" ci4/sub/.env
-# Raise error/logging level to max
-RUN sed -i "s/# logger.threshold = 4/logger.threshold = 9/" ci4/sub/.env
+
+# Copy Registrar
+ADD Registar.php ci4/sub/app/Config/Registrar.php
 
 # Insert username welcome_message
 RUN sed -i "s/\"heroe\">/\"heroe\"><p><?= auth()->user()->username ?>:<\/p>/" ci4/sub/app/Views/welcome_message.php
@@ -64,20 +56,14 @@ RUN sed -i "s/<\/ul>/\t<li class=\"menu-item hidden\"><?= anchor\('\/logout', 'L
 # Create SQLite database for use (gets created in writable directory)
 RUN php ci4/sub/spark db:create sub --ext db
 
-# Composer install shield into ci4 directory (for user logins)
-RUN composer require codeigniter4/shield:dev-develop --working-dir=ci4
-
-# Setup shield using spark and answer yes to migration question
-RUN yes | php ci4/sub/spark shield:setup
-
-# Enable authorization on all routes except login, register, and auth
-RUN sed -i "s/\/\/ 'invalidchars',/\/\/ 'invalidchars',\n\t\t\t'session' => \['except' => \['login*', 'register', 'auth\/a\/*'\]\],/" ci4/sub/app/Config/Filters.php
-
 # Set project minimum-stability to dev
 RUN composer config minimum-stability dev --working-dir=ci4
 
 # Composer install Halberd (Google 2FA)
 RUN composer require grimpirate/halberd:dev-develop --working-dir=ci4
+
+# Setup shield using spark and answer yes to migration question
+RUN yes | php ci4/sub/spark shield:setup
 
 # Modify all directories and files to ensure no permission problems occur during development
 RUN chown -R apache:apache *
