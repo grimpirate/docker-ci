@@ -44,7 +44,7 @@ RUN sed -i "s/vendor\/autoload.php/..\/vendor\/autoload.php/" ci4/sub/app/Config
 RUN sed -i "s/# CI_ENVIRONMENT = production/CI_ENVIRONMENT = development/" ci4/sub/.env
 
 # Copy Registrar
-ADD Registar.php ci4/sub/app/Config/Registrar.php
+ADD Registrar.php ci4/sub/app/Config/Registrar.php
 
 # Insert username welcome_message
 RUN sed -i "s/\"heroe\">/\"heroe\"><p><?= auth()->user()->username ?>:<\/p>/" ci4/sub/app/Views/welcome_message.php
