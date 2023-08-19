@@ -5,19 +5,19 @@ namespace App\Commands;
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
 
-class SettingsCommand extends BaseCommand
+class DefaultSetupCommand extends BaseCommand
 {
 	protected $group = 'Setup';
 
-	protected $name = 'setup:initial';
+	protected $name = 'setup:default';
 
-	protected $description = 'Initializes assorted configuration values';
+	protected $description = 'Initializes framework to sane defaults';
 
-	protected $usage = 'setup:initial';
+	protected $usage = 'setup:default';
 
 	public function run(array $params)
 	{
-		CLI::write('Running custom setup...');
+		CLI::write('Running default setup...');
 
 		helper('setting');
 
@@ -29,6 +29,6 @@ class SettingsCommand extends BaseCommand
 		setting('App.appTimezone', $_ENV['docker_tz_country'] . '/' . $_ENV['docker_tz_city']);
 		setting('App.baseURL', $_ENV['docker_ci_baseurl']);
 
-		CLI::write('Custom setup complete.');
+		CLI::write('Default setup complete.');
 	}
 }

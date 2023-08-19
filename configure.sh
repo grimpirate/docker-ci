@@ -1,10 +1,12 @@
 #!/bin/sh
 
+# Start apache daemon
 httpd -k start &
 
 # https://stackoverflow.com/questions/63595435/install-mysql-on-a-vm-under-alpine
 mysqld --user=root --data=/data &> /dev/null &
 
+# Poll for MySQL daemon
 while ! mysqladmin ping -h localhost --silent; do
 	sleep 1
 done
@@ -22,6 +24,6 @@ yes | php /var/www/localhost/htdocs/$docker_ci_subdir/spark shield:setup
 php /var/www/localhost/htdocs/$docker_ci_subdir/spark migrate
 
 # Initial setup
-php /var/www/localhost/htdocs/$docker_ci_subdir/spark setup:initial
+php /var/www/localhost/htdocs/$docker_ci_subdir/spark setup:default
 
 exec sh

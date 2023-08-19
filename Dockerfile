@@ -1,6 +1,7 @@
 # Base image
 FROM alpine
 
+# Configurable build time variables
 ARG db_name=codeigniter4
 ARG db_user=username
 ARG db_pass=password
@@ -9,6 +10,8 @@ ARG tz_country=America
 ARG tz_city=New_York
 ARG ci_subdir=sub
 ARG ci_baseurl=http://localhost
+
+# Environment variables for docker container
 ENV docker_db_name $db_name
 ENV docker_db_user $db_user
 ENV docker_db_pass $db_pass
@@ -18,7 +21,7 @@ ENV docker_tz_city $tz_city
 ENV docker_ci_subdir $ci_subdir
 ENV docker_ci_baseurl $ci_baseurl
 
-# Install requirements for Codeigniter and SQLite
+# Install requirements for Codeigniter, MySQL and SQLite
 RUN apk add --no-cache apache2 php-apache2 php-pdo php-intl php-dom php-xml php-xmlwriter php-tokenizer php-ctype php-sqlite3 php-session composer sqlite nano tzdata php-simplexml php-mysqli mysql mysql-client phpmyadmin php-fpm php-pdo_mysql
 RUN rm -rf /var/cache/apk/*
 
@@ -30,7 +33,7 @@ RUN mysql_install_db
 RUN chown -R apache:apache /usr/share/webapps/phpmyadmin
 RUN chown -R apache:apache /etc/phpmyadmin
 
-# Setup phpmyadmin for automatic login
+# Setup phpmyadmin for automatic login and hide information_schema database/table(s)
 RUN sed -i "s/'auth_type'.*/'auth_type'] = 'config';\n\$cfg['Servers'][\$i]['user'] = '${db_user}';\n\$cfg['Servers'][\$i]['password'] = '${db_pass}';\n\$cfg['Servers'][\$i]['hide_db'] = 'information_schema';/" /etc/phpmyadmin/config.inc.php
 RUN sed -i "s/'AllowNoPassword'.*/'AllowNoPassword'] = true;/" /etc/phpmyadmin/config.inc.php
 
@@ -46,32 +49,30 @@ RUN sed -i "s/#LoadModule rewrite_module/LoadModule rewrite_module/" /etc/apache
 # AllowOverride All for .htaccess directives to supercede defaults
 RUN sed -i "s/AllowOverride None/AllowOverride All/" /etc/apache2/httpd.conf
 
-###################
-### CODEIGNITER ###
-###################
+# <CodeIgniter 4 Default Setup>
 
 WORKDIR /var/www/localhost/htdocs
 
 # Clear contents of htdocs
 RUN rm -rf *
 
-# Create sub folder
+# Create subdirectory
 RUN mkdir $ci_subdir
 
-# Change web folder from /var/www/localhost/htdocs to /var/www/localhost/htdocs/sub/public
+# Change web folder from /var/www/localhost/htdocs to CodeIgniter public folder
 RUN sed -i "s/htdocs/htdocs\/${ci_subdir}\/public/" /etc/apache2/httpd.conf
 
-# Composer install codeigniter4 framework
+# Composer install CodeIgniter 4 framework
 RUN composer require codeigniter4/framework
 
-# Copy files from framework into sub directory
+# Copy files from framework into subdirectory
 RUN cp -R vendor/codeigniter4/framework/app $ci_subdir/.
 RUN cp -R vendor/codeigniter4/framework/public $ci_subdir/.
 
-# Use writable at the root level rather than sub level
+# Use writable at the framework level rather than subdirectory level
 RUN cp -R vendor/codeigniter4/framework/writable .
 
-# Copy spark and .env file into sub (ignoring phpunit.xml.dist)
+# Copy spark and .env file into subdirectory (ignoring phpunit.xml.dist)
 RUN cp vendor/codeigniter4/framework/env $ci_subdir/.env
 RUN cp vendor/codeigniter4/framework/spark $ci_subdir/.
 
@@ -85,6 +86,7 @@ RUN sed -i "s/vendor\/autoload.php/..\/vendor\/autoload.php/" $ci_subdir/app/Con
 
 # Change environment to development
 RUN sed -i "s/# CI_ENVIRONMENT = production/CI_ENVIRONMENT = development/" $ci_subdir/.env
+
 # Copy all environment variables to .env file
 RUN echo "docker_db_name=${db_name}">> $ci_subdir/.env
 RUN echo "docker_db_user=${db_user}">> $ci_subdir/.env
@@ -106,22 +108,12 @@ RUN composer require codeigniter4/shield:dev-develop
 ADD app/Config/Registrar.php $ci_subdir/app/Config/Registrar.php
 ADD app/Commands $ci_subdir/app/Commands
 
-# Create ci_sessions table
+# Create CodeIgniter sessions table
 ADD app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php $ci_subdir/app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php
 
-###################
-### CODEIGNITER ###
-###################
+# </CodeIgniter 4 Default Setup>
 
-##############
-### CUSTOM ###
-##############
-
-
-
-##############
-### CUSTOM ###
-##############
+# <Custom Site Setup></Custom Site Setup>
 
 # Modify all directories and files to ensure no permission problems occur during development
 RUN chown -R apache:apache *
