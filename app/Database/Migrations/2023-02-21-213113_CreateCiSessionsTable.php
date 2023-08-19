@@ -30,11 +30,11 @@ class CreateCiSessionsTable extends Migration
 		]);
 		$this->forge->addKey(['id', 'ip_address'], true);
 		$this->forge->addKey('timestamp');
-		$this->forge->createTable('ci_sessions', true);
+		$this->forge->createTable($_ENV['docker_db_sessions'], true);
 	}
 
 	public function down()
 	{
-		$this->forge->dropTable('ci_sessions', true);
+		$this->forge->dropTable($_ENV['docker_db_sessions'], true);
 	}
 }

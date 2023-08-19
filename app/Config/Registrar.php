@@ -8,9 +8,9 @@ class Registrar
 	{
 		return [
 			'default' => [
-				'username' => 'username',
-				'password' => 'password',
-				'database' => 'codeigniter4'
+				'username' => $_ENV['docker_db_user'],
+				'password' => $_ENV['docker_db_pass'],
+				'database' => $_ENV['docker_db_name']
 			]
 		];
 	}

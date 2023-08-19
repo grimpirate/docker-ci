@@ -22,12 +22,12 @@ class SettingsCommand extends BaseCommand
 		helper('setting');
 
 		setting('Session.driver', 'CodeIgniter\Session\Handlers\DatabaseHandler');
-		setting('Session.savePath', 'ci_sessions');
+		setting('Session.savePath', $_ENV['docker_db_sessions']);
 		setting('Session.matchIP', 'true');
 
 		setting('App.indexPage', '');
-		setting('App.appTimezone', 'America/New_York');
-		setting('App.baseURL', 'http://localhost');
+		setting('App.appTimezone', $_ENV['docker_tz_country'] . '/' . $_ENV['docker_tz_city']);
+		setting('App.baseURL', $_ENV['docker_ci_baseurl']);
 
 		CLI::write('Custom setup complete.');
 	}
