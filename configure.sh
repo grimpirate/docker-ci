@@ -30,6 +30,6 @@ php /var/www/localhost/htdocs/$docker_ci_subdir/spark setup:default
 chown -R apache:apache /var/www/localhost/htdocs/*
 chmod -R 0777 /var/www/localhost/htdocs/*
 
-echo 'Shell ready'
+echo -e "\nCodeIgniter ready"
 
 exec sh
