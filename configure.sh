@@ -26,4 +26,10 @@ php /var/www/localhost/htdocs/$docker_ci_subdir/spark migrate
 # Initial setup
 php /var/www/localhost/htdocs/$docker_ci_subdir/spark setup:default
 
+# Apache permissions for web folder
+chown -R apache:apache /var/www/localhost/htdocs/*
+chmod -R 0777 /var/www/localhost/htdocs/*
+
+echo 'Shell ready'
+
 exec sh

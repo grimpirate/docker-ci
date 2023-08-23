@@ -4,6 +4,17 @@ namespace Config;
 
 class Registrar
 {
+	public static function Filters(): array
+	{
+		return [
+			'globals' => [
+				'after' => [
+					//'toolbar'
+				]
+			]
+		];
+	}
+
 	public static function Database(): array
 	{
 		return [
@@ -15,14 +26,21 @@ class Registrar
 		];
 	}
 
-	public static function Filters(): array
+	public static function App(): array
 	{
 		return [
-			'globals' => [
-				'after' => [
-					//'toolbar'
-				]
-			]
+			'indexPage' => '',
+			'appTimezone' => $_ENV['docker_tz_country'] . '/' . $_ENV['docker_tz_city'],
+			'baseURL' => $_ENV['docker_ci_baseurl']
+		];
+	}
+
+	public static function Session(): array
+	{
+		return [
+			'driver' => \CodeIgniter\Session\Handlers\DatabaseHandler::class,
+			'savePath' => $_ENV['docker_db_sessions'],
+			'matchIP' => true
 		];
 	}
 }

@@ -11,15 +11,15 @@ ARG tz_city=New_York
 ARG ci_subdir=sub
 ARG ci_baseurl=http://localhost
 
-# Environment variables for docker container
+# Environment variables for docker container (used by configure.sh)
 ENV docker_db_name $db_name
 ENV docker_db_user $db_user
 ENV docker_db_pass $db_pass
-ENV docker_db_sessions $db_sessions
-ENV docker_tz_country $tz_country
-ENV docker_tz_city $tz_city
+# ENV docker_db_sessions $db_sessions
+# ENV docker_tz_country $tz_country
+# ENV docker_tz_city $tz_city
 ENV docker_ci_subdir $ci_subdir
-ENV docker_ci_baseurl $ci_baseurl
+# ENV docker_ci_baseurl $ci_baseurl
 
 # Install requirements for Codeigniter, MySQL and SQLite
 RUN apk add --no-cache apache2 php-apache2 php-pdo php-intl php-dom php-xml php-xmlwriter php-tokenizer php-ctype php-sqlite3 php-session composer sqlite nano tzdata php-simplexml php-mysqli mysql mysql-client phpmyadmin php-fpm php-pdo_mysql
@@ -114,10 +114,6 @@ ADD app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php $ci_subd
 # </CodeIgniter 4 Default Setup>
 
 # <Custom Site Setup></Custom Site Setup>
-
-# Modify all directories and files to ensure no permission problems occur during development
-RUN chown -R apache:apache *
-RUN chmod -R 0777 *
 
 # Copy configure.sh to root to enable runtime configuration
 WORKDIR /
