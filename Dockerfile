@@ -29,13 +29,10 @@ RUN rm -rf /var/cache/apk/*
 RUN mkdir /run/mysqld
 RUN mysql_install_db
 
-# Configure phpmyadmin ownerships
-RUN chown -R apache:apache /usr/share/webapps/phpmyadmin
-RUN chown -R apache:apache /etc/phpmyadmin
-
 # Setup phpmyadmin for automatic login and hide information_schema database/table(s)
 RUN sed -i "s/'auth_type'.*/'auth_type'] = 'config';\n\$cfg['Servers'][\$i]['user'] = '${db_user}';\n\$cfg['Servers'][\$i]['password'] = '${db_pass}';\n\$cfg['Servers'][\$i]['hide_db'] = 'information_schema';/" /etc/phpmyadmin/config.inc.php
 RUN sed -i "s/'AllowNoPassword'.*/'AllowNoPassword'] = true;/" /etc/phpmyadmin/config.inc.php
+RUN sed -i "s/\/\/\$cfg\['ProtectBinary'\].*/\$cfg['ProtectBinary'] = false;/" /etc/phpmyadmin/config.inc.php
 
 # Setup timezone (appropriate timezone necessary for Google 2FA)
 RUN cp /usr/share/zoneinfo/$tz_country/$tz_city /etc/localtime

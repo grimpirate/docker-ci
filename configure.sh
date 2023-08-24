@@ -26,10 +26,13 @@ php /var/www/localhost/htdocs/$docker_ci_subdir/spark migrate
 # Initial setup
 php /var/www/localhost/htdocs/$docker_ci_subdir/spark setup:default
 
-# Apache permissions for web folder
-chown -R apache:apache /var/www/localhost/htdocs/*
+# Ownerships
+chown -R apache:apache /usr/share/webapps/phpmyadmin /etc/phpmyadmin /var/www/localhost/htdocs
+
+# Permissions
 chmod -R 0777 /var/www/localhost/htdocs/*
 
+# Server/framework is ready for interaction
 CODEIGNITER_VERSION=$(php /var/www/localhost/htdocs/$docker_ci_subdir/spark env | grep -Eo "v[[:digit:]\.]+")
 echo -e "\nCodeIgniter $CODEIGNITER_VERSION ready"
 
