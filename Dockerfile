@@ -103,7 +103,6 @@ RUN composer require codeigniter4/shield:dev-develop
 
 # Set up database and app configuration
 ADD app/Config/Registrar.php $ci_subdir/app/Config/Registrar.php
-ADD app/Commands $ci_subdir/app/Commands
 
 # Create CodeIgniter sessions table
 ADD app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php $ci_subdir/app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php
