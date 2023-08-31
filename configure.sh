@@ -23,9 +23,6 @@ yes | php /var/www/localhost/htdocs/$docker_ci_subdir/spark shield:setup
 # Initialize database tables
 php /var/www/localhost/htdocs/$docker_ci_subdir/spark migrate
 
-# Initial setup
-php /var/www/localhost/htdocs/$docker_ci_subdir/spark setup:default
-
 # Ownerships
 chown -R apache:apache /usr/share/webapps/phpmyadmin /etc/phpmyadmin /var/www/localhost/htdocs
 
