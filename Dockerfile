@@ -107,6 +107,11 @@ ADD app/Config/Registrar.php $ci_subdir/app/Config/Registrar.php
 # Create CodeIgniter sessions table
 ADD app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php $ci_subdir/app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php
 
+# Modify registration page to remove username field
+RUN cp vendor/codeigniter4/shield/src/Views/register.php $ci_subdir/app/Views/register.php
+RUN sed -i "s/form-floating mb-4/form-floating mb-4 d-none/" $ci_subdir/app/Views/register.php
+RUN sed -i "s/username') ?>\" required/username') ?>\"/" $ci_subdir/app/Views/register.php
+
 # </CodeIgniter 4 Default Setup>
 
 # <Custom Site Setup></Custom Site Setup>
