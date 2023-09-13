@@ -84,6 +84,20 @@ RUN sed -i "s/vendor\/autoload.php/..\/vendor\/autoload.php/" $ci_subdir/app/Con
 # Change environment to development
 RUN sed -i "s/# CI_ENVIRONMENT = production/CI_ENVIRONMENT = development/" $ci_subdir/.env
 
+# Set project minimum-stability to dev
+RUN composer config minimum-stability dev
+RUN composer config prefer-stable true
+
+# Composer install shield (for user administration)
+RUN composer require codeigniter4/shield:dev-develop
+
+# Create CodeIgniter sessions table
+ADD app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php $ci_subdir/app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php
+
+# </CodeIgniter 4 Default Setup>
+
+# <Custom Site Setup>
+
 # Copy all environment variables to .env file
 RUN echo "docker_db_name=${db_name}">> $ci_subdir/.env
 RUN echo "docker_db_user=${db_user}">> $ci_subdir/.env
@@ -94,27 +108,15 @@ RUN echo "docker_tz_city=${tz_city}">> $ci_subdir/.env
 RUN echo "docker_ci_subdir=${ci_subdir}">> $ci_subdir/.env
 RUN echo "docker_ci_baseurl=${ci_baseurl}">> $ci_subdir/.env
 
-# Set project minimum-stability to dev
-RUN composer config minimum-stability dev
-RUN composer config prefer-stable true
-
-# Composer install shield (for user administration)
-RUN composer require codeigniter4/shield:dev-develop
-
 # Set up database and app configuration
 ADD app/Config/Registrar.php $ci_subdir/app/Config/Registrar.php
-
-# Create CodeIgniter sessions table
-ADD app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php $ci_subdir/app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php
 
 # Modify registration page to remove username field
 RUN cp vendor/codeigniter4/shield/src/Views/register.php $ci_subdir/app/Views/register.php
 RUN sed -i "s/form-floating mb-4/form-floating mb-4 d-none/" $ci_subdir/app/Views/register.php
 RUN sed -i "s/username') ?>\" required/username') ?>\"/" $ci_subdir/app/Views/register.php
 
-# </CodeIgniter 4 Default Setup>
-
-# <Custom Site Setup></Custom Site Setup>
+# </Custom Site Setup>
 
 # Copy configure.sh to root to enable runtime configuration
 WORKDIR /
