@@ -56,9 +56,9 @@ class Registrar
 	{
 		return [
 			'default' => [
-				'username' => $_ENV['docker_db_user'],
-				'password' => $_ENV['docker_db_pass'],
-				'database' => $_ENV['docker_db_name']
+				'username' => $_ENV['docker.db_user'],
+				'password' => $_ENV['docker.db_pass'],
+				'database' => $_ENV['docker.db_name']
 			]
 		];
 	}
@@ -67,8 +67,8 @@ class Registrar
 	{
 		return [
 			'indexPage' => '',
-			'appTimezone' => $_ENV['docker_tz_country'] . '/' . $_ENV['docker_tz_city'],
-			'baseURL' => $_ENV['docker_ci_baseurl']
+			'appTimezone' => $_ENV['docker.tz_country'] . '/' . $_ENV['docker.tz_city'],
+			'baseURL' => $_ENV['docker.ci_baseurl']
 		];
 	}
 
@@ -76,7 +76,7 @@ class Registrar
 	{
 		return [
 			'driver' => \CodeIgniter\Session\Handlers\DatabaseHandler::class,
-			'savePath' => $_ENV['docker_db_sessions'],
+			'savePath' => $_ENV['docker.db_sessions'],
 			'matchIP' => true
 		];
 	}

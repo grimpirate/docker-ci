@@ -99,14 +99,14 @@ ADD app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php $ci_subd
 # <Custom Site Setup>
 
 # Copy all environment variables to .env file
-RUN echo "docker_db_name=${db_name}">> $ci_subdir/.env
-RUN echo "docker_db_user=${db_user}">> $ci_subdir/.env
-RUN echo "docker_db_pass=${db_pass}">> $ci_subdir/.env
-RUN echo "docker_db_sessions=${db_sessions}">> $ci_subdir/.env
-RUN echo "docker_tz_country=${tz_country}">> $ci_subdir/.env
-RUN echo "docker_tz_city=${tz_city}">> $ci_subdir/.env
-RUN echo "docker_ci_subdir=${ci_subdir}">> $ci_subdir/.env
-RUN echo "docker_ci_baseurl=${ci_baseurl}">> $ci_subdir/.env
+RUN echo "docker.db_name=${db_name}">> $ci_subdir/.env
+RUN echo "docker.db_user=${db_user}">> $ci_subdir/.env
+RUN echo "docker.db_pass=${db_pass}">> $ci_subdir/.env
+RUN echo "docker.db_sessions=${db_sessions}">> $ci_subdir/.env
+RUN echo "docker.tz_country=${tz_country}">> $ci_subdir/.env
+RUN echo "docker.tz_city=${tz_city}">> $ci_subdir/.env
+RUN echo "docker.ci_subdir=${ci_subdir}">> $ci_subdir/.env
+RUN echo "docker.ci_baseurl=${ci_baseurl}">> $ci_subdir/.env
 
 # Set up database and app configuration
 ADD app/Config/Registrar.php $ci_subdir/app/Config/Registrar.php
