@@ -6,6 +6,15 @@ use CodeIgniter\Shield\Authentication\Passwords;
 
 class Registrar
 {
+	public static function Email(): array
+	{
+		// Required for spark migration to proceed successfully
+		return [
+			'fromEmail' => 'anonym@us.com',
+			'fromName' => 'anonym@us',
+		];
+	}
+	
 	public static function Validation(): array
 	{
 		// Disables username validation on Shield registration
