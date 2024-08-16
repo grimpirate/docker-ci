@@ -12,17 +12,17 @@ ARG ci_subdir=sub
 ARG ci_baseurl=http://localhost
 
 # Environment variables for docker container (used by configure.sh)
-ENV docker_db_name $db_name
-ENV docker_db_user $db_user
-ENV docker_db_pass $db_pass
-# ENV docker_db_sessions $db_sessions
-# ENV docker_tz_country $tz_country
-# ENV docker_tz_city $tz_city
-ENV docker_ci_subdir $ci_subdir
-# ENV docker_ci_baseurl $ci_baseurl
+ENV docker_db_name=$db_name
+ENV docker_db_user=$db_user
+ENV docker_db_pass=$db_pass
+# ENV docker_db_sessions=$db_sessions
+# ENV docker_tz_country=$tz_country
+# ENV docker_tz_city=$tz_city
+ENV docker_ci_subdir=$ci_subdir
+# ENV docker_ci_baseurl=$ci_baseurl
 
 # Install requirements for Codeigniter, MySQL and SQLite
-RUN apk add --no-cache apache2 php-apache2 php-pdo php-intl php-dom php-xml php-xmlwriter php-tokenizer php-ctype php-sqlite3 php-session composer sqlite nano tzdata php-simplexml php-mysqli mysql mysql-client phpmyadmin php-fpm php-pdo_mysql
+RUN apk add --no-cache apache2 php-apache2 php-pdo php-intl php-dom php-xml php-xmlwriter php-tokenizer php-ctype php-sqlite3 php-session composer sqlite nano tzdata php-simplexml php-mysqli php-fpm php-pdo_mysql mysql mysql-client phpmyadmin
 RUN rm -rf /var/cache/apk/*
 
 # Prepare MySQL server
@@ -48,6 +48,15 @@ RUN sed -i "s/AllowOverride None/AllowOverride All/" /etc/apache2/httpd.conf
 
 # <CodeIgniter 4 Default Setup>
 
+# Change web folder from /var/www/localhost/htdocs to CodeIgniter public folder
+RUN sed -i "s/htdocs/htdocs\/${ci_subdir}\/public/" /etc/apache2/httpd.conf
+
+# Copy configure.sh to root to enable runtime configuration
+ADD configure.sh .
+RUN chmod +x configure.sh
+# Replace Windows line endings with Unix line endings
+RUN sed -i "s/\r//g" configure.sh
+
 WORKDIR /var/www/localhost/htdocs
 
 # Clear contents of htdocs
@@ -55,9 +64,6 @@ RUN rm -rf *
 
 # Create subdirectory
 RUN mkdir $ci_subdir
-
-# Change web folder from /var/www/localhost/htdocs to CodeIgniter public folder
-RUN sed -i "s/htdocs/htdocs\/${ci_subdir}\/public/" /etc/apache2/httpd.conf
 
 # Composer install CodeIgniter 4 framework
 RUN composer require codeigniter4/framework
@@ -118,18 +124,11 @@ RUN sed -i "s/username') ?>\" required/username') ?>\"/" $ci_subdir/app/Views/re
 
 # </Custom Site Setup>
 
-# Copy configure.sh to root to enable runtime configuration
-WORKDIR /
-ADD configure.sh .
-RUN chmod +x configure.sh
-# Replace Windows line endings with Unix line endings
-RUN sed -i "s/\r//g" configure.sh
-
 # Set up volume into htdocs directory
 VOLUME ["/var/www/localhost/htdocs"]
 
 # Run configure.sh
-CMD ["./configure.sh"]
+CMD ["/configure.sh"]
 
 # Expose port 80 for external access
 EXPOSE 80

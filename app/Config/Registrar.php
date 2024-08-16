@@ -51,13 +51,31 @@ class Registrar
 
 	public static function Filters(): array
 	{
-		// Disables CodeIgniter4 toolbar in development mode
 		return [
+			// Protects all site pages
 			'globals' => [
-				'after' => [
-					//'toolbar'
+				'before' => [
+					'session' => [
+						'except' => [
+							'login*',
+							'register',
+							'auth/a/*'
+						]
+					]
 				]
-			]
+			],
+			// Disable the toolbar
+			'required' => [
+				'before' => [
+					'forcehttps', // Force Global Secure Requests
+					'pagecache',  // Web Page Caching
+				],
+				'after' => [
+					'pagecache',   // Web Page Caching
+					'performance', // Performance Metrics
+					//'toolbar',     // Debug Toolbar
+				],
+			],
 		];
 	}
 
@@ -77,7 +95,10 @@ class Registrar
 		return [
 			'indexPage' => '',
 			'appTimezone' => $_ENV['docker.tz_country'] . '/' . $_ENV['docker.tz_city'],
-			'baseURL' => $_ENV['docker.ci_baseurl']
+			'baseURL' => $_ENV['docker.ci_baseurl'],
+			'defaultLocale' => 'en',
+			'negotiateLocale' => true,
+			'supportedLocales' => ['en'],
 		];
 	}
 
