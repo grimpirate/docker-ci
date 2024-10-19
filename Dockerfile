@@ -97,9 +97,6 @@ RUN composer config prefer-stable true
 # Composer install shield (for user administration)
 RUN composer require codeigniter4/shield:dev-develop
 
-# Create CodeIgniter sessions table
-ADD app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php $ci_subdir/app/Database/Migrations/2023-02-21-213113_CreateCiSessionsTable.php
-
 # </CodeIgniter 4 Default Setup>
 
 # <Custom Site Setup>
@@ -114,8 +111,9 @@ RUN echo "docker.tz_city=${tz_city}">> $ci_subdir/.env
 RUN echo "docker.ci_subdir=${ci_subdir}">> $ci_subdir/.env
 RUN echo "docker.ci_baseurl=${ci_baseurl}">> $ci_subdir/.env
 
-# Set up database and app configuration
-ADD app/Config/Registrar.php $ci_subdir/app/Config/Registrar.php
+# Copy our custom site logic
+ADD --chown=apache:apache app $ci_subdir/app
+# ADD --chown=apache:apache public $ci_subdir/public
 
 # Modify registration page to remove username field
 RUN cp vendor/codeigniter4/shield/src/Views/register.php $ci_subdir/app/Views/register.php

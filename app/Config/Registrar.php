@@ -14,38 +14,20 @@ class Registrar
 			'fromName' => 'anonym@us',
 		];
 	}
-	
-	public static function Validation(): array
-	{
-		// Disables username validation on Shield registration
-		return [
-			'registration' => [
-				'email' => [
-					'label' => 'Auth.email',
-					'rules' => 'required|max_length[254]|valid_email|is_unique[auth_identities.secret]'
-				],
-				'password' => [
-					'label'  => 'Auth.password',
-					'rules'  => 'required|' . Passwords::getMaxLengthRule() . '|strong_password[]',
-					'errors' => [
-						'max_byte' => 'Auth.errorPasswordTooLongBytes'
-					]
-				],
-				'password_confirm' => [
-					'label' => 'Auth.passwordConfirm',
-					'rules' => 'required|matches[password]'
-				]
-			]
-		];
-	}
 
 	public static function Auth(): array
 	{
-		// Custom register form view
 		return [
+			// Custom register form view
 			'views' => [
 				'register' => '\App\Views\register.php'
-			]
+			],
+			// Disables username validation on Shield registration
+			'usernameValidationRules' => [
+				'rules' => [
+					'permit_empty',
+				],
+			],
 		];
 	}
 
@@ -66,10 +48,6 @@ class Registrar
 			],
 			// Disable the toolbar
 			'required' => [
-				'before' => [
-					'forcehttps', // Force Global Secure Requests
-					'pagecache',  // Web Page Caching
-				],
 				'after' => [
 					'pagecache',   // Web Page Caching
 					'performance', // Performance Metrics
